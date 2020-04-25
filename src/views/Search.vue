@@ -15,46 +15,16 @@
       <el-input placeholder="页内搜索..." v-model="newSearch" class="input-with-select" @input="change">
         <el-button slot="append" icon="el-icon-search" :disabled="hasValue" v-on:click="toSearch"></el-button>
       </el-input>
-      <div class="sortArea">
-        <span
-          class="sortBtn"
-          v-bind:class="{active:sortIndex == 0}"
-          id="base"
-          v-on:click="sortChoose"
-        >默认排序</span>
-        <span
-          class="sortBtn"
-          v-bind:class="{active:sortIndex == 1}"
-          id="price"
-          v-on:click="sortChoose"
-        >
-          价格
-          <i class="el-icon-d-caret"></i>
-        </span>
-        <span
-          class="sortBtn"
-          v-bind:class="{active:sortIndex == 2}"
-          id="upTime"
-          v-on:click="sortChoose"
-        >
-          上架时间
-          <i class="el-icon-d-caret"></i>
-        </span>
-      </div>
     </div>
     <!-- 内容展示区 -->
     <div class="contentArea">
       <!-- 有数据 -->
       <div class="data_has" v-if="hasData">
         <div class="data_item" v-for="(item,index) in dataList" v-bind:key="index">
-          <div class="item_img" :style="{backgroundImage:'url('+item.url+')'}"></div>
+          <div class="item_img" :style="{backgroundImage:'url('+item.image+')'}"></div>
           <div class="item_msg">
-            <span class="item_name">{{item.goodName}}</span>
+            <span class="item_name">{{item.name}}</span>
             <span class="item_price">￥{{item.price}}</span>
-            <span class="item_status" v-if="item.status == 1">全新闲置</span>
-            <span class="item_status" v-else-if="item.status == 2">全新瑕疵</span>
-            <span class="item_status" v-else-if="item.status == 3">九成新</span>
-            <span class="item_status" v-else>正常新</span>
             <div class="handleArea">
               <span class="btn_detail" v-on:click="lookDetail(item)">查看详情</span>
               <span class="btn_shop">加入购物车</span>
@@ -66,19 +36,6 @@
       <div class="data_empty" v-else>
         <span class="empty_tips">很抱歉，未检索到相关数据...</span>
       </div>
-    </div>
-    <!-- 分页 -->
-    <div class="paging">
-      <el-pagination
-        v-if="hasSearch"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-size="pagesize"
-        layout="prev, pager, next"
-        :total="total"
-        :size="size"
-      ></el-pagination>
     </div>
     <!-- 底栏 -->
     <div class="footer">
@@ -162,11 +119,6 @@ export default {
       dataList: [],
       newSearch: "",
       sortIndex: 0,
-      // 分页
-      total: 20,
-      size: 6,
-      currentPage: 1, //初始页
-      pagesize: 6,
       hasSearch: true,
       // 搜索
       hasValue: true
@@ -184,6 +136,9 @@ export default {
     // 跳转详情
     lookDetail: function(param) {
       console.log(param);
+      this.$router.push("/GoodDetail");
+      localStorage.removeItem("good");
+      localStorage.setItem("good", JSON.stringify(param));
     },
     sortChoose: function(e) {
       const keyWord = e.target.id;
@@ -194,37 +149,40 @@ export default {
       } else {
         this.sortIndex = 2;
       }
-      /* 
-        发请求的时候用keyWord字段：
-                base 默认排序
-                price  按照价格排序
-                upTime 上架时间
-        请求完成之后，赋值给dataList
-        对应字段：
-                url:图片地址
-                goodName：货物名称
-                price：货物价格
-                status：新旧程度
-      */
     },
     // 分页
-    handleSizeChange: function(pagesize) {
-      console.log(pagesize);
+    handleSizeChange: function(pageSize) {
+      console.log(pageSize);
     },
-    handleCurrentChange: function(currentPage) {
-      console.log(currentPage);
+    handleCurrentChange: function(pageNum) {
+      console.log(pageNum);
     },
     // 搜索
-    toSearch: function() {
+    async toSearch() {
       this.sortIndex = 0;
       const keyWord = this.newSearch;
-      this.currentPage = 1;
+      this.pageNum = 1;
       this.hasSearch = false;
       this.$nextTick(() => {
         this.hasSearch = true;
       });
       // 发起请求-重新赋值
-
+      localStorage.removeItem("searchValue");
+      const datas = {
+        name: this.newSearch,
+        pageNum: 1,
+        pageSize: 10,
+      }
+      const res = await this.$http.post('api/product/selectProductAndType', datas)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.hasData = true
+        this.dataList = data.list
+        this.loading = false
+        this.$message.success(message)
+      } else {
+        this.$message.error(message)
+      }
     },
     // 控制搜索按钮的开启和禁用
     change: function(param) {
@@ -233,23 +191,35 @@ export default {
       } else {
         this.hasValue = true;
       }
+    },
+    // 获取Home组件search内容
+    async getSearchData() {
+      this.searchValue = JSON.parse(localStorage.getItem("searchValue"));
+      const datas = {
+        name: this.searchValue,
+        pageNum: 1,
+        pageSize: 10,
+      }
+      const res = await this.$http.post('api/product/selectProductAndType', datas)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.hasData = true
+        this.dataList = data.list
+        this.loading = false
+      } else {
+        this.$message.error(message)
+      }
     }
   },
-  beforeCreate: function() {},
-  beforeMount: function() {
-    this.searchValue = JSON.parse(localStorage.getItem("searchValue"));
-    this.$axios
-      .post("http://localhost:8086/goods/findBySelectGoods", {
-        keyWord: this.searchValue,
-        pageSize: 12,
-        currentPage: 1
-      })
-      .then(res => {
-        if (res.data) {
-          this.dataList = res.data.data.list;
-          this.hasData = true;
-        }
-      });
+  beforeCreate() {},
+  beforeMount() {
+    this.searchValue = JSON.parse(localStorage.getItem("searchValue"))
+    if (this.searchValue) {
+      console.log('检索')
+      this.getSearchData()
+    } else {
+      console.log('查找')
+    }
   }
 };
 </script>
@@ -307,7 +277,8 @@ export default {
       justify-content: space-between;
       align-items: center;
       .data_item {
-        width: 450px;
+        // flex: 3;
+        width: 30%;
         height: 300px;
         background-color: #fff;
         margin-bottom: 50px;
@@ -318,8 +289,10 @@ export default {
         flex-direction: row;
         transition: all 0.3s;
         cursor: pointer;
+        padding-left: 1%;
+        padding-right: 1%;
         .item_img {
-          width: 50%;
+          width: 48%;
           height: 100%;
           background-position: center;
           background-repeat: no-repeat;
@@ -333,9 +306,16 @@ export default {
           flex-direction: column;
           align-items: flex-start;
           .item_name {
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 20px;
             margin-top: 30px;
+            width: 170px;
+            font-size: 20px;
+            margin-top: 30px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2; 
           }
           .item_price {
             font-size: 20px;

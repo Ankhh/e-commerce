@@ -15,27 +15,17 @@
     </div>
     <!-- 主要内容区域 -->
     <div class="mainInfo">
-      <div class="good_image" :style="{backgroundImage:'url('+itemDetail.url+')'}"></div>
+      <div class="good_image" :style="{backgroundImage:'url('+itemDetail.image+')'}"></div>
       <div class="good_info">
         <span class="good_name">{{itemDetail.name}}</span>
         <span class="good_price">￥{{itemDetail.price}}</span>
-        <span class="good_intro" v-if="itemDetail.tips">{{itemDetail.tips}}</span>
-        <div class="levelCover">
-          <span class="levelTitle">联系方式：</span>
-          400-8820-8820
-          <!-- <div class="good_level">
-            <div
-              class="levelItem"
-              v-bind:class="{active:index == current}"
-              v-for="(item,index) in levelList"
-              v-bind:key="index"
-              v-on:click="chooseType(index)"
-            >
-              {{item.content}}
-              <span class="tips" v-if="index == current">{{item.tips}}</span>
-            </div>
-          </div> -->
+        <span class="good_intro">{{itemDetail.point}}</span>
+        <div class="good_seckill">
+          <div class="price">秒杀价：<span>￥{{itemDetail.price}}</span><del>￥{{itemDetail.price/0.8}}</del></div>
+          <div class="promotion">促销：<span>限时</span>该商品目前一律八折优惠</div>
         </div>
+        <div class="levelCover">联系方式：400-8820-8820</div>
+        <div class="levelCover">温馨提示·支持7天无理由退货(激活后不支持)</div>
         <div class="shopCar">
           <span class="shopItem buyNow" v-on:click="toShopCar">立即购买</span>
           <div class="shopItem addCar" v-on:click="addShopCar">加入购物车</div>
@@ -123,24 +113,6 @@ export default {
     return {
       goodId: "test",
       itemDetail: {},
-      levelList: [
-        {
-          content: "全新闲置",
-          tips: "全新无试穿、配件齐全、原盒方正"
-        },
-        {
-          content: "全新瑕疵",
-          tips: "轻微瑕疵"
-        },
-        {
-          content: "九成新",
-          tips: "下地试穿或者3次以下正常穿着"
-        },
-        {
-          content: "正常新",
-          tips: "3-6次正常穿着"
-        }
-      ],
       current: 0,
       goodList: []
     };
@@ -243,56 +215,40 @@ export default {
         background-color: rgb(247, 247, 247);
         border-radius: 2px;
       }
+      .good_seckill {
+        display: block;
+        width: 100%;
+        line-height: 35px;
+        color: rgb(39, 39, 39);
+        text-align: left;
+        border: 1px solid #ccc;
+        margin: 15px 0;
+        padding-left: 15px;
+        font-size: 14px;
+        .price span{
+          color: red;
+        }
+        del {
+          color: #999;
+          margin-left: 20px;
+        }
+        .promotion span {
+          display: inline-block;
+          width: 30px;
+          border: 1px solid mediumvioletred;
+          padding: 0px 5px;
+          margin-bottom: 3px;
+          margin-right: 3px;
+          color: mediumvioletred;
+          height: 23px;
+          line-height: 27px;
+        }
+      }
       .levelCover {
         width: 100%;
-        height: 50px;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        flex-direction: row;
-        margin-top: 30px;
-        .levelTitle {
-          display: block;
-          width: 100px;
-          height: 50px;
-          line-height: 50px;
-          text-align: left;
-        }
-        .good_level {
-          width: calc(100% - 50px);
-          height: 50px;
-          display: flex;
-          justify-content: space-around;
-          flex-direction: row;
-          align-items: center;
-          position: relative;
-          .levelItem {
-            padding: 10px 10px;
-            border: 2px solid #000;
-            transition: all 0.3s;
-            cursor: pointer;
-            &.active {
-              background-color: #000;
-              color: #fff;
-            }
-            &:hover {
-              background-color: #000;
-              color: #fff;
-            }
-            .tips {
-              position: absolute;
-              bottom: -40px;
-              font-size: 16px;
-              color: #a3a3a3;
-              width: 300px;
-              left: 50%;
-              transform: translateX(-50%);
-              height: 20px;
-              line-height: 20px;
-              text-align: center;
-            }
-          }
-        }
+        height: 20px;
+        margin-top: 20px;
+        text-align: left;
       }
       .shopCar {
         width: 100%;

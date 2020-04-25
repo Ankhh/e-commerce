@@ -6,10 +6,10 @@
     <div class="topBanner">
       <!-- logo -->
       <span class="logo"></span>
-      <!-- search -->
+      <!-- search检索 -->
       <div class="searchArea">
         <div class="searchInput">
-          <el-input placeholder="请输入内容" v-model="serachValue">
+          <el-input placeholder="请输入内容" v-model="name">
             <el-button slot="append" icon="el-icon-search" type="danger" v-on:click="toSearch()"></el-button>
           </el-input>
         </div>
@@ -19,7 +19,6 @@
             <li
               v-for="(item,index) in hotKeyList"
               v-bind:key="index"
-              v-on:click="getKey(item)"
             >{{item}}</li>
           </ul>
         </div>
@@ -29,11 +28,12 @@
         <div class="personInfo" v-on:click="toUserPage">
           <span class="userHead"></span>
         </div>
-        <div class="to_shopCar" v-on:click="toShopCar"></div>
+        <div class="to_shopCar" v-on:click="toShopCar"><span class="goodNum" v-if="dataList.length != 0">{{dataList.length}}</span></div>
         <div class="to_admin" v-on:click="toAdmin"></div>
+        <div class="go_back" v-on:click="goBack"><i class="el-icon-refresh-left" v-on:click="goBack"></i></div>
       </div>
     </div>
-    <!-- 侧边展开区域 -->
+    <!-- tab展开区域 -->
     <div class="slideBar">
       <div class="leftArea">
         <span
@@ -41,36 +41,25 @@
           v-bind:class="index==slideIndex?'active':''"
           v-for="(item,index) in leftList"
           v-bind:key="index"
-          v-on:click="chooseSlide(index,item)"
+          v-on:click="chooseSlide(index, item)"
         >{{item}}</span>
       </div>
       <div class="rightArea">
         <!-- 内容区 -->
         <div class="itemCover">
           <div
+            v-loading="loading"
             class="itemDetail"
-            v-for="(item,index) in rightList"
+            v-for="(item,index) in list1"
             v-bind:key="index"
             v-on:click="toDetail(item)"
           >
-            <div class="itemImage" :style="{backgroundImage:'url('+item.url+')'}"></div>
+            <div class="itemImage" :style="{backgroundImage:'url('+item.image+')'}"></div>
             <div class="itemIntro">
               <span class="itemPrice">￥{{item.price}}</span>
-              <span class="itemText">{{item.tips}}</span>
+              <span class="itemText">{{item.name}}</span>
             </div>
           </div>
-        </div>
-        <!-- 分页 -->
-        <div class="paging">
-          <el-pagination
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-size="pagesize"
-            layout="prev, pager, next"
-            :total="13"
-            :size="12"
-          ></el-pagination>
         </div>
       </div>
     </div>
@@ -79,21 +68,21 @@
       <span class="recommend_title">爆款推荐</span>
       <div class="recomment_content">
         <div class="item_cover">
-          <div class="item_type">AJ1</div>
+          <div class="item_type">热卖</div>
           <div
             class="item_content"
-            v-for="(item,index) in aj1"
+            v-for="(item,index) in list2"
             v-bind:key="index"
             v-on:click="toDetail(item)"
           >
-            <div class="item_image" :style="{backgroundImage:'url('+item.url+')'}"></div>
+            <div class="item_image" :style="{backgroundImage:'url('+item.image+')'}"></div>
             <!-- 名字 -->
             <span class="recomment_name">{{item.name}}</span>
             <!-- 价格 -->
             <span class="recomment_price">￥{{item.price}}</span>
           </div>
         </div>
-        <div class="item_cover">
+        <!-- <div class="item_cover">
           <div class="item_type">AJ13</div>
           <div
             class="item_content"
@@ -102,24 +91,22 @@
             v-on:click="toDetail(item)"
           >
             <div class="item_image" :style="{backgroundImage:'url('+item.url+')'}"></div>
-            <!-- 名字 -->
             <span class="recomment_name">{{item.name}}</span>
-            <!-- 价格 -->
             <span class="recomment_price">￥{{item.price}}</span>
           </div>
-        </div>
+        </div> -->
       </div>
       <span class="recommend_title">大牌云集</span>
       <div class="recomment_content">
         <div class="item_cover">
-          <div class="item_type">IPhone</div>
+          <div class="item_type">手机</div>
           <div
             class="item_content"
-            v-for="(item,index) in iphone"
+            v-for="(item,index) in list3"
             v-bind:key="index"
             v-on:click="toDetail(item)"
           >
-            <div class="item_image" :style="{backgroundImage:'url('+item.url+')'}"></div>
+            <div class="item_image" :style="{backgroundImage:'url('+item.image+')'}"></div>
             <!-- 名字 -->
             <span class="recomment_name">{{item.name}}</span>
             <!-- 价格 -->
@@ -127,14 +114,14 @@
           </div>
         </div>
         <div class="item_cover">
-          <div class="item_type">XiaoMi</div>
+          <div class="item_type">笔记本</div>
           <div
             class="item_content"
-            v-for="(item,index) in xm"
+            v-for="(item,index) in list4"
             v-bind:key="index"
             v-on:click="toDetail(item)"
           >
-            <div class="item_image" :style="{backgroundImage:'url('+item.url+')'}"></div>
+            <div class="item_image" :style="{backgroundImage:'url('+item.image+')'}"></div>
             <!-- 名字 -->
             <span class="recomment_name">{{item.name}}</span>
             <!-- 价格 -->
@@ -165,9 +152,9 @@
       </ul>
       <div class="bottomPart">
         <ul class="bottom_list">
-          <li>关于我们</li>
+          <li v-on:click="toConnect()">关于我们</li>
           <i></i>
-          <li>联系我们</li>
+          <li v-on:click="toConnect()">联系我们</li>
           <i></i>
           <li>联系客服</li>
           <i></i>
@@ -216,235 +203,36 @@
   </div>
 </template>
 
-<script type='text/ecmascript-6'>
+<script>
 export default {
   data() {
     return {
       // 搜索区域
-      serachValue: "",
+      name: "",
       hotKeyList: ["电风扇", "电视", "小米手机", "乐视电视", "动漫周边"],
       hotKey: "",
       userName: "李嘉诚",
       // 侧栏展开区
       leftList: [
-        "手机数码",
         "家用电器",
-        "运动户外",
-        "游戏装备",
         "儿童玩具",
-        "趣味图书",
         "精美服装",
         "猎奇百货"
       ],
       slideIndex: 0,
-      rightList: [],
+      // rightList: [],
       rightValue: "",
-      newValue: [
-        {
-          name: "智能机器狗遥控动物对话走路机器人男女孩电动玩具1-6岁",
-          url: "/static/slideBar/儿童玩具/pic1.jpg",
-          tips: "智能机器狗遥控动物对话走路机器人男女孩电动玩具1-6岁",
-          price: "168",
-          isNew: false,
-          id: 1
-        },
-        {
-          name: "正版植物大战僵尸玩具全套3男孩大反击僵尸套装豌豆射手儿童公仔",
-          url: "/static/slideBar/儿童玩具/pic2.jpg",
-          tips: "正版植物大战僵尸玩具全套3男孩大反击僵尸套装豌豆射手儿童公仔",
-          price: "139",
-          isNew: false,
-          id: 2
-        },
-        {
-          name: "迪士尼儿童过家家玩具女孩化妆品套装无毒梳妆台盒冰雪奇缘",
-          url: "/static/slideBar/儿童玩具/pic3.jpg",
-          tips: "迪士尼儿童过家家玩具女孩化妆品套装无毒梳妆台盒冰雪奇缘",
-          price: "49",
-          isNew: false,
-          id: 3
-        },
-        {
-          name: "迪士尼儿童化妆品公主彩妆盒套装无毒小女孩儿玩具指甲油可水洗",
-          url: "/static/slideBar/儿童玩具/pic4.jpg",
-          tips: "迪士尼儿童化妆品公主彩妆盒套装无毒小女孩儿玩具指甲油可水洗",
-          price: "68",
-          isNew: false,
-          id: 4
-        },
-        {
-          name: "儿童益智玩具早教音乐一两三周宝宝1-3岁开发智力生日礼物",
-          url: "/static/slideBar/儿童玩具/pic5.jpg",
-          tips: "儿童益智玩具早教音乐一两三周宝宝1-3岁开发智力生日礼物",
-          price: "28",
-          isNew: false,
-          id: 5
-        },
-        {
-          name: "儿童钓鱼玩具套装开发智力一两三周宝宝益智礼物女孩儿",
-          url: "/static/slideBar/儿童玩具/pic6.jpg",
-          tips: "儿童钓鱼玩具套装开发智力一两三周宝宝益智礼物女孩儿",
-          price: "69",
-          isNew: false,
-          id: 6
-        },
-        {
-          name: "儿童益智玩具2-3小孩7一岁十两三周岁宝宝多功能智力开发",
-          url: "/static/slideBar/儿童玩具/pic7.jpg",
-          tips: "儿童益智玩具2-3小孩7一岁十两三周岁宝宝多功能智力开发",
-          price: "79",
-          isNew: false,
-          id: 7
-        },
-        {
-          name: "沃尔沃挖掘机双鹰电动遥控钩机挖土机儿童玩具合金版",
-          url: "/static/slideBar/儿童玩具/pic8.jpg",
-          tips: "沃尔沃挖掘机双鹰电动遥控钩机挖土机儿童玩具合金版",
-          price: "269",
-          isNew: false,
-          id: 8
-        },
-        {
-          name: "贝恩施儿童厨房玩具过家家套装仿真厨具做饭煮饭男女孩宝宝3-6岁7",
-          url: "/static/slideBar/儿童玩具/pic9.jpg",
-          tips: "贝恩施儿童厨房玩具过家家套装仿真厨具做饭煮饭男女孩宝宝3-6岁7",
-          price: "158",
-          isNew: false,
-          id: 9
-        },
-        {
-          name: "汇乐摇摆鹅儿童电动玩具会唱歌跳舞益智小鸭子宝宝1-3岁男孩抖音",
-          url: "/static/slideBar/儿童玩具/pic10.jpg",
-          tips: "汇乐摇摆鹅儿童电动玩具会唱歌跳舞益智小鸭子宝宝1-3岁男孩抖音",
-          price: "119",
-          isNew: false,
-          id: 10
-        },
-        {
-          name: "贝恩施儿童购物车玩具女孩 超市小手推车过家家宝宝",
-          url: "/static/slideBar/儿童玩具/pic11.jpg",
-          tips: "贝恩施儿童购物车玩具女孩 超市小手推车过家家宝宝",
-          price: "37",
-          isNew: false,
-          id: 11
-        },
-        {
-          name: "特宝儿啄木鸟捉虫玩具喂小鸟鸡抓吃虫子俩岁女孩儿宝宝益智",
-          url: "/static/slideBar/儿童玩具/pic12.jpg",
-          tips: "特宝儿啄木鸟捉虫玩具喂小鸟鸡抓吃虫子俩岁女孩儿宝宝益智",
-          price: "69",
-          isNew: false,
-          id: 12
-        }
-      ],
       // 分页
-      currentPage: 1, //初始页
-      pagesize: 12,
-      // 热门推荐
-      aj1: [
-        {
-          url: "/static/hotRecomment/shoes/1/2.jpg",
-          price: "168",
-          name: "AirJoran1 伦纳德",
-          level: 1
-        },
-        {
-          url: "/static/hotRecomment/shoes/1/3.jpg",
-          price: "168",
-          name: "AirJoran1 黑粉脚趾",
-          level: 2
-        },
-        {
-          url: "/static/hotRecomment/shoes/1/4.jpg",
-          price: "168",
-          name: "AirJoran1 骚粉",
-          level: 3
-        },
-        {
-          url: "/static/hotRecomment/shoes/1/5.jpg",
-          price: "168",
-          name: "AirJoran1 鸳鸯拼接",
-          level: 4
-        }
-      ],
-      aj13: [
-        {
-          url: "/static/hotRecomment/shoes/2/1.jpg",
-          price: "168",
-          name: "Air Jordan 13 OGChicago",
-          level: 1
-        },
-        {
-          url: "/static/hotRecomment/shoes/2/2.jpg",
-          price: "168",
-          name: "Air Jordan 13 Playoffs",
-          level: 2
-        },
-        {
-          url: "/static/hotRecomment/shoes/2/3.jpg",
-          price: "168",
-          name: "Air Jordan 13 蒂芙尼",
-          level: 3
-        },
-        {
-          url: "/static/hotRecomment/shoes/2/4.jpg",
-          price: "168",
-          name: "Air Jordan 13 黑白熊猫",
-          level: 4
-        }
-      ],
-      iphone: [
-        {
-          url: "/static/hotRecomment/electric/1/11pro.jpg",
-          price: "168",
-          name: "iPhone11pro",
-          level: 1
-        },
-        {
-          url: "/static/hotRecomment/electric/1/iPhone8.jpg",
-          price: "168",
-          name: "iPhone8",
-          level: 2
-        },
-        {
-          url: "/static/hotRecomment/electric/1/xr.jpg",
-          price: "168",
-          name: "iPhoneXR",
-          level: 3
-        },
-        {
-          url: "/static/hotRecomment/electric/1/xs.jpg",
-          price: "168",
-          name: "iPhoneXS",
-          level: 4
-        }
-      ],
-      xm: [
-        {
-          url: "/static/hotRecomment/electric/2/1.jpg",
-          price: "168",
-          name: "CC9PRO",
-          level: 1
-        },
-        {
-          url: "/static/hotRecomment/electric/2/2.jpg",
-          price: "168",
-          name: "游戏本2019款",
-          level: 3
-        },
-        {
-          url: "/static/hotRecomment/electric/2/3.jpg",
-          price: "168",
-          name: "小爱音箱",
-          level: 3
-        },
-        {
-          url: "/static/hotRecomment/electric/2/4.jpg",
-          price: "168",
-          name: "mix3",
-          level: 4
-        }
-      ]
+      pageNum: 1, //初始页
+      pageSize: 12,
+      total: '',
+      loading: true,
+      // 数据
+      list1: [],
+      list2: [],
+      list3: [],
+      list4: [],
+      dataList: [],
     };
   },
   methods: {
@@ -464,10 +252,15 @@ export default {
       this.$router.push("/admin")
     },
     // 侧边栏点击
-    chooseSlide: function(param1, param2) {
-      this.slideIndex = param1;
-      this.rightValue = param2;
-      this.getSlideDetail(this.slideIndex);
+    async chooseSlide(index, item) {
+      this.slideIndex = index
+      const res = await this.$http.post('api/product/selectProductAndType', { type: index })
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.list1 = data.list
+      } else {
+        this.$message.error(message)
+      }
     },
     // 向后台请求侧边栏对应详情数据
     getSlideDetail: function(param) {
@@ -477,11 +270,16 @@ export default {
       // 根据返回的结果赋值 -> 赋值给this.rightList
     },
     // 分页
-    handleSizeChange: function(pagesize) {
-      console.log(pagesize);
+    handleSizeChange(val) {
+      // console.log(`每页 ${val} 条`)
+      this.pageSize = val;
+      this.pageNum = 1;
+      this.getData()
     },
-    handleCurrentChange: function(currentPage) {
-      console.log(currentPage);
+    handleCurrentChange(val) {
+      // console.log(`当前页: ${val}`)
+      this.pageNum = val;
+      this.getData()
     },
     // 跳转详情页
     toDetail: function(param) {
@@ -490,24 +288,65 @@ export default {
       localStorage.setItem("good", JSON.stringify(param));
     },
     // 跳转搜索页
-    toSearch: function(param) {
-      if (this.serachValue) {
+    toSearch() {
+      if (this.name) {
         localStorage.removeItem("searchValue");
-        localStorage.setItem("searchValue", JSON.stringify(this.serachValue));
+        localStorage.setItem("searchValue", JSON.stringify(this.name));
         this.$router.push("/search");
       } else {
-        this.$message("请输入搜索值");
+        this.$message.warning("请输入搜索值");
+      }
+    },
+    // 跳转到联系我们页面
+    // 联系我们页面跳转
+    toConnect() {
+      this.$router.push('/connect')
+    },
+    goBack() {
+      console.log('login')
+      this.$router.push('/login')
+    },
+    // 获取数据
+    async getData() {
+      const page = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+      }
+      // 发起请求---获取第一页的数据---赋值给rightList
+      const res = await this.$http.get('api/product/list', page)
+      console.log(res)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.$message.success(message)
+        this.list1 = data.list1
+        this.list2 = data.list2
+        this.list3 = data.list3
+        this.list4 = data.list4
+        // this.pageNum = data.pageNum
+        // this.pageSize = data.pageSize
+        // this.total = data.total
+        this.loading = false
+      } else {
+        this.$message.error(message)
       }
     }
   },
-  beforeCreate: function() {
-    // 发起请求---获取第一页的数据---赋值给rightList
-  },
+  beforeCreate() {
+  }, 
   beforeMount: function() {
+    this.getData()
+    if (localStorage.getItem("goodList")) {
+      this.dataList = JSON.parse(localStorage.getItem("goodList"));
+      this.dataList.forEach(val => {
+        val.choose = false;
+      });
+    } else {
+      this.dataList = [];
+    }
     // 发起请求，获取第一组数据，然后赋值
-    this.rightValue = this.leftList[0];
-    this.rightList = this.newValue;
-  }
+    // this.rightValue = this.leftList[0];
+    // this.rightList = this.newValue;
+  },
 };
 </script>
 
@@ -525,7 +364,7 @@ export default {
     height: 100px;
     padding: 0 200px;
     background-color: #000000;
-    background-image: url("../assets/image/logo4.png");
+    background-image: url("../assets/image/logo.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -591,7 +430,7 @@ export default {
       }
     }
     .banner_right {
-      width: 12%;
+      width: 18%;
       height: 100%;
       display: flex;
       justify-content: flex-start;
@@ -630,7 +469,23 @@ export default {
         background-repeat: no-repeat;
         cursor: pointer;
         margin-right: 30px;
+        position: relative;
+        .goodNum {
+          display: block;
+          padding: 0 5px;
+          background-color: #f56c6c;
+          height: 20px;
+          line-height: 20px;
+          text-align: center;
+          border-radius: 10px;
+          color: #fff;
+          font-size: 14px;
+          position: absolute;
+          right: -10px;
+          top: 20px;
+        }
       }
+      
       .to_admin {
         width: 100%;
         height: 100%;
@@ -639,6 +494,14 @@ export default {
         background-size: contain;
         background-repeat: no-repeat;
         cursor: pointer;
+        margin-right: 30px;
+      }
+      .go_back {
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        font-size: 30px;
+        line-height: 80px;
       }
     }
   }

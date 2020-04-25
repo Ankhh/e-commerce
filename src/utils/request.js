@@ -1,12 +1,9 @@
 // // 环境切换
-// // if (process.env.NODE_ENV == 'development') {    
-// //     axios.defaults.baseURL = 'https://www.baidu.com';} 
-// // else if (process.env.NODE_ENV == 'debug') {    
-// //     axios.defaults.baseURL = 'https://www.ceshi.com';
-// // } 
-// // else if (process.env.NODE_ENV == 'production') {    
-// //     axios.defaults.baseURL = 'https://www.production.com';
-// // }
+// if (process.env.NODE_ENV == 'development') {    
+//     axios.defaults.baseURL = 'http://47.100.13.76:8083';} 
+// else if (process.env.NODE_ENV == 'production') {    
+//     axios.defaults.baseURL = 'localhost:8080';
+// }
 
 // /**********************************************************************************************************/ 
 // // 请求超时

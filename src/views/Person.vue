@@ -28,7 +28,7 @@
       <div class="main_content" v-if="current_main == 0">
         <div class="mc_item userName">
           <span class="tips">姓名：</span>
-          <el-input v-model="baseUser.name" placeholder="请输入用户姓名" @change="changeName"></el-input>
+          <el-input v-model="baseUser.tel" placeholder="请输入用户姓名" @change="changeName"></el-input>
         </div>
         <div class="mc_item userSex">
           <span class="tips">性别：</span>
@@ -36,27 +36,27 @@
             class="sex_img man"
             id="man"
             v-on:click="chooseSex"
-            v-bind:class="{active:baseUser.sex == 0}"
+            v-bind:class="{active:baseUser.sex === '男'}"
           ></span>
           <span
             class="sex_img woman"
             id="woman"
             v-on:click="chooseSex"
-            v-bind:class="{active:baseUser.sex == 1}"
+            v-bind:class="{active:baseUser.sex === '女'}"
           ></span>
         </div>
         <div class="mc_item userAge">
           <span class="tips">年龄：</span>
           <el-input v-model="baseUser.age" placeholder="请输入年龄" @change="changeAge"></el-input>
         </div>
-        <div class="mc_item userAge">
+        <!-- <div class="mc_item userAge">
           <span class="tips">邮箱：</span>
           <el-input v-model="baseUser.email" placeholder="请输入邮箱" @change="changeEmail"></el-input>
         </div>
         <div class="mc_item userAge">
           <span class="tips">联系方式：</span>
           <el-input v-model="baseUser.phone" placeholder="请输入联系方式" @change="changePhone"></el-input>
-        </div>
+        </div> -->
         <div class="mc_item userAddress">
           <span class="tips">收货地址：</span>
           <el-table :data="tableData" style="width: 100%">
@@ -351,12 +351,14 @@ export default {
     return {
       // 用户基本信息
       baseUser: {
-        name: "",
+        tel: "",
         sex: 0,
         age: "",
         email: "",
-        phone: ""
+        phone: "",
       },
+      // 用户id
+      id: localStorage.getItem('userId'),
       // 收货地址信息
       tableData: [
         {
@@ -505,9 +507,28 @@ export default {
   },
   methods: {
     // 获取当前用户信息
-    getUserInfo: function() {
+    async getUserInfo() {
+      console.log(this.id)
       // 在进入到页面的时候就调用
       // 发起请求--获取基本信息赋值给baseUser
+      const res = await this.$http.get(`api/user/get/${this.id}`)
+      console.log(res)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.baseUser = data
+      } else {
+        this.$router.error('用户信息获取失败')
+      }
+    },
+    // 获取订单信息
+    async getOrderMessage() {
+      const res = await this.$http.get(`api/order/get/${this.id}`)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        console.log(data.list)
+      } else {
+        this.$message.error(message)
+      }
     },
     getAddressInfo: function(param) {
       // 在进入到页面的时候就调用
@@ -811,6 +832,9 @@ export default {
           box-shadow: 0px 5px 5px #f0b262;
         }
       }
+    }
+    .userAddress {
+      margin-top: 30px;
     }
   }
 }

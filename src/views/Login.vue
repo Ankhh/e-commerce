@@ -11,10 +11,10 @@
         <div v-if="isLogin" class="content">
           <el-form :label-position="labelPosition" label-width="80px" :model="loginMsg">
             <el-form-item label="用户名：">
-              <el-input placeholder="请输入用户名" v-model="loginMsg.loginUername"></el-input>
+              <el-input placeholder="请输入用户名" v-model="loginMsg.username"></el-input>
             </el-form-item>
             <el-form-item label="密码：">
-              <el-input placeholder="请输入密码" v-model="loginMsg.loginPassword"></el-input>
+              <el-input placeholder="请输入密码" v-model="loginMsg.password"></el-input>
             </el-form-item>
           </el-form>
           <div class="loginBtn" v-on:click="login">登录</div>
@@ -23,17 +23,20 @@
         <div v-else class="content">
           <el-form :label-position="labelPosition" label-width="80px" :model="register">
             <el-form-item label="用户名：">
-              <el-input placeholder="请输入用户名" v-model="register.name"></el-input>
+              <el-input placeholder="请输入用户名" v-model="register.tel"></el-input>
             </el-form-item>
             <el-form-item label="密码：">
               <el-input placeholder="请输入密码" v-model="register.password"></el-input>
             </el-form-item>
-            <el-form-item label="邮箱：">
-              <el-input placeholder="请输入邮箱" v-model="register.Email"></el-input>
+            <el-form-item label="年龄：">
+              <el-input placeholder="请输入密码" v-model="register.age"></el-input>
             </el-form-item>
-            <el-form-item label="电话：">
-              <el-input placeholder="请输入电话" v-model="register.Phone"></el-input>
+            <el-form-item label="性别：">
+              <el-input placeholder="请输入密码" v-model="register.sex"></el-input>
             </el-form-item>
+            <!-- <el-form-item label="电话：">
+              <el-input placeholder="请输入电话" v-model="register.tel"></el-input>
+            </el-form-item> -->
           </el-form>
           <div class="loginBtn" v-on:click="toRegister">注册</div>
         </div>
@@ -48,18 +51,13 @@ export default {
     return {
       // 登录
       loginMsg: {
-        loginUername: "",
-        loginPassword: ""
+        username: "",
+        password: ""
       },
 
       // 注册
       labelPosition: "left",
-      register: {
-        userName: "",
-        password: "",
-        Email: "",
-        Phone: ""
-      },
+      register: {},
       isLogin: true
     };
   },
@@ -73,62 +71,32 @@ export default {
       this.loginPassword = "";
     },
     // 登录
-    login: function(e) {
-      console.log("登录");
-      this.$router.push("/home");
-      // var checkLoginRelult = this.checkLogin();
-      // if (checkLoginRelult == "登录账号为空") {
-      //   alert("账号不能为空!");
-      //   return;
-      // }
-      // if (checkLoginRelult == "登录密码为空") {
-      //   alert("密码不能为空!");
-      //   return;
-      // }
-      // var alarm = {};
-      // alarm = this.loginMsg
-      // $.post("/user/doLogin", alarm, function(data) {
-      //   data1 = JSON.parse(data);
-      //   if (data1 == "登录成功！") {
-      //     window.location.href = "/main.jsp";
-      //   } else {
-      //     alert(data1);
-      //   }
-      // });
+    async login() {
+      // console.log(this.loginMsg)
+      const res = await this.$http.post("api/user/login", this.loginMsg)
+      console.log(res)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.$message.success(message)
+        console.log(data.id)
+        localStorage.setItem('userId', data.id)
+        this.$router.push('home')
+      } else {
+        this.$message.error(message)
+      }
     },
     // 注册
-    toRegister: function(e) {
-      console.log("注册");
-      this.$router.push("/Home");
+    async toRegister() {
+      // console.log(this.register);
+      const res = await this.$http.post('api/user/add', this.register)
+      // console.log(res)
+      const { data, code, message } = res.data
+      if (code === 200) {
+        this.$message.success(message)
+      } else {
+        this.$message.error(message)
+      }
     },
-    checkSpecificKey(str) {
-      var specialKey = "`~!#$^&*【】";
-      for (var i = 0; i < str.length; i++) {
-        if (specialKey.indexOf(str.substr(i, 1)) != -1) {
-          return false;
-        }
-      }
-      return true;
-    },
-    checkLogin() {
-      if (
-        this.loginMsg.loginUsername == null ||
-        this.loginMsg.loginUsername == "" ||
-        this.loginMsg.loginUsername.length == 0 ||
-        this.loginMsg.loginUsername == "undefined"
-      ) {
-        return "登录账号为空";
-      }
-      if (
-        this.loginMsg.loginPassword == null ||
-        this.loginMsg.loginPassword == "" ||
-        this.loginMsg.loginPassword.length == 0 ||
-        this.loginMsg.loginPassword == "undefined"
-      ) {
-        return "登录密码为空";
-      }
-      return "成功";
-    }
   }
 };
 </script>
@@ -152,7 +120,7 @@ export default {
     right: 100px;
     transform: translateY(-50%);
     border-radius: 20px;
-    padding: 30px 50px;
+    padding: 20px 50px;
     .topBanner {
       width: 100%;
       height: 60px;
@@ -186,10 +154,10 @@ export default {
     .bottomArea {
       width: 100%;
       height: calc(100% - 150px);
-      margin-top: 10%;
+      margin-top: 5%;
       .content {
         width: 100%;
-        height: 100%;
+        height: 120%;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -207,6 +175,7 @@ export default {
           font-size: 20px;
           text-align: center;
           cursor: pointer;
+          margin-top: -10px;
         }
       }
     }

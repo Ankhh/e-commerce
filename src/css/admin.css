@@ -24,7 +24,7 @@
   display: inline-block;
   width: 100px;
   height: 50px;
-  background-image: url('../assets//image/logo4.png');
+  background-image: url('../assets//image/logo.png');
   background-size: 100%;
   background-repeat: no-repeat;
   background-position: left;
@@ -102,8 +102,15 @@
   align-items: left;
   flex-direction: column;
 }
-.cover .mainInfo .main_content .saleGood .el-input {
+.cover .mainInfo .main_content .saleGood .searchBtn {
+  width: 100%;
+  justify-content: flex-start;
+}
+.cover .mainInfo .main_content .saleGood .searchBtn .el-input {
   width: 400px;
+}
+.cover .mainInfo .main_content .saleGood .searchBtn button {
+  width: 100px;
 }
 .cover .mainInfo .main_content .saleGood .SG_List {
   width: 100%;

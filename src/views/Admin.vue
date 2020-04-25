@@ -29,13 +29,11 @@
             </el-input>
           </div>
           <el-table :data="tableData" style="width: 100%">
-            <el-table-column prop="name" label="姓名"></el-table-column>
-            <el-table-column prop="userName" label="用户名"></el-table-column>
-            <el-table-column prop="address" label="地址"></el-table-column>
+            <el-table-column prop="tel" label="姓名"></el-table-column>
             <el-table-column prop="age" label="年龄"></el-table-column>
             <el-table-column prop="sex" label="性别"></el-table-column>
             <el-table-column prop="phone" label="联系方式"></el-table-column>
-            <el-table-column prop="email" label="邮箱"></el-table-column>
+            <el-table-column prop="amt" label="余额"></el-table-column>
             <el-table-column fixed="right" label="操作" width="100">
               <template slot-scope="scope">
                 <el-button @click="deleteUser(scope.row)" type="text" size="small">删除</el-button>
@@ -56,9 +54,12 @@
       <!-- 在售商品 -->
       <div class="main_content" v-else-if="currentIndex == 1">
         <div class="saleGood">
-          <el-input placeholder="搜索商品" v-model="searchGood">
-            <el-button slot="append" icon="el-icon-search" v-on:click="toSearchGood"></el-button>
-          </el-input>
+          <div class="searchBtn">
+            <el-input placeholder="搜索商品" v-model="searchGood">
+              <el-button slot="append" icon="el-icon-search" v-on:click="toSearchGood"></el-button>
+            </el-input>
+            <el-button @click="handleAddGoods()" size="small" type="primary">添加商品</el-button>
+          </div>
           <div class="SG_List">
             <div class="SG_Item" v-for="(item,index) in SGlist" :key="index">
               <div class="SG_img" :style="{backgroundImage:'url('+item.url+')'}"></div>
@@ -205,10 +206,28 @@
         </div>
       </div>
     </el-dialog>
+    <!-- 添加商品 -->
+    <el-dialog title="添加商品" :visible.sync="addFlag" width="700px">
+      <el-form ref="form" :model="form" label-width="80px">
+        <el-form-item label="商品名称">
+          <el-input v-model="form.name"></el-input>
+        </el-form-item>
+        <el-form-item label="商品价格">
+          <el-input v-model="form.price"></el-input>
+        </el-form-item>
+        <el-form-item label="商品描述">
+          <el-input type="textarea" v-model="form.desc"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">立即创建</el-button>
+          <el-button>取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
-<script type='text/ecmascript-6'>
+<script>
 export default {
   data() {
     return {
@@ -238,7 +257,9 @@ export default {
       // 待审核数据
       AGdialog: false,
       AGlist: [],
-      AGitem: {}
+      AGitem: {},
+      addFlag: false,
+      form: {},  //商品表单
     };
   },
   methods: {
@@ -252,8 +273,10 @@ export default {
         this.getSaleGood();
       }
     },
-    toSearch: function(param) {
-      console.log(this.searchValue);
+    async toSearch() {
+      console.log(this.searchValue)
+      const res = await this.$http.get(`api/user/get/${id}`)
+      console.log(res)
     },
     toSearchGood: function(param) {
       // 发起请求，重新赋值
@@ -262,31 +285,36 @@ export default {
       // 待审核数据检索--重新赋值
     },
     // 请求用户数据
-    getUserList: function(param) {
-      this.$axios.get("/userList").then(res => {
-        this.tableData = res.data.data;
-        this.total = res.data.data.length;
-      });
+    async getUserList(param) {
+      const res = await this.$http.get("api/user/list")
+      console.log(res)
+      const { data, code, message } = res.data
+      if(code === 200) {
+        this.tableData = data.list
+        this.total = data.total
+        this.currentPage = data.pageNum
+        this.size = data.pagesize
+      } else {
+        this.$message.error(message)
+      }
     },
     // 删除用户
     deleteUser: function(param) {
       const id = param.id;
+      // console.log(param)
       this.$confirm("此操作将永久删除该用户, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
-        .then(() => {
+        .then(async () => {
           // 发起请求--修改数据
-          //   this.$axios.post("/xxxx", id).then(res => {
-          //     if (res.statusCode == 200) {
-          //       this.$message({
-          //         type: "success",
-          //         message: "删除成功!"
-          //       });
-          //       this.tableData = res.data
-          //     }
-          //   });
+          const res = await this.$http.delete(`/api/user/delete/${id}`)
+          const { data, code, message } = res.data
+          if (code === 200) {
+            this.$message.success(message)
+            this.getUserList()
+          }
         })
         .catch(() => {
           this.$message({
@@ -329,7 +357,6 @@ export default {
       this.SGdialog = false;
       // 发起请求--删除数据--重新赋值列表数据
     },
-
     // 获取待审核数据
     getAuditGood: function() {
       this.$axios.get("/auditList", {}).then(res => {
@@ -364,6 +391,13 @@ export default {
     // 审核驳回
     auditPass: function(param) {
       this.AGdialog = false;
+    },
+    // 添加商品
+    handleAddGoods: function() {
+      this.addFlag = true
+    },
+    onSubmit() {
+
     }
   },
   beforeMount: function() {

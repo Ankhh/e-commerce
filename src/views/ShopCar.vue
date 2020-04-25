@@ -23,16 +23,12 @@
           v-on:click="chooseItem(item)"
         ></div>
         <div class="goodInfo">
-          <span class="good_img" :style="{backgroundImage:'url('+item.url+')'}"></span>
+          <span class="good_img" :style="{backgroundImage:'url('+item.image+')'}"></span>
           <span class="good_name">{{item.name}}</span>
           <span class="good_price">￥{{item.price}}</span>
-          <span class="good_type" v-if="item.type == 1">全新闲置</span>
-          <span class="good_type" v-else-if="item.type == 2">全新瑕疵</span>
-          <span class="good_type" v-else-if="item.type == 3">九成新</span>
-          <span class="good_type" v-else>正常新</span>
         </div>
         <div class="handleArea">
-          <span class="change" v-on:click="changeItem(item,index)">修改</span>
+          <!-- <span class="change" v-on:click="changeItem(item,index)">修改</span> -->
           <span class="delete" v-on:click="deleteItem(item,index)">删除</span>
         </div>
       </div>
